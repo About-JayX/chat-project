@@ -5,9 +5,6 @@
 </template>
 
 <script setup lang="ts">
-import { piniaStore } from '@/store'
-const store = piniaStore()
-console.log(store, "store");
 
 
 </script>

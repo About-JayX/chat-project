@@ -1,44 +1,52 @@
 <template>
   <div class="form">
-      <p class="form-title">{{ type=='changeRegister'?'注册':'请登录'}}</p>
+      <p class="form-title">{{ type=='register'?'注册':'请登录'}}</p>
        <div class="input-container email" >
-            <input type="email" placeholder="请输入邮箱" >
+            <input type="email" placeholder="请输入邮箱" v-model="form.email">
             <span>
             </span>
-            <div v-show=" ['emailLogin','changeRegister'].includes(type)" class="arrow-btn" @click="verify">{{!verifyDisabled ? `重新发送(${time}s)` :'验证'}}</div>
+            <div v-show=" ['emailLogin','register'].includes(type)" class="arrow-btn" @click="verify">{{!verifyDisabled ? `重新发送(${time}s)` :'验证'}}</div>
         </div>
         <div class="input-container">
-         <input type="password" placeholder="请输入密码" v-show=" ['psdLogin','changeRegister'].includes(type)  ">
-         <input type="password" placeholder="再次确认密码" v-show="type == 'changeRegister'">
-         <input type="text" placeholder="请输入邮箱验证码" v-show=" ['emailLogin','changeRegister'].includes(type)" :disabled = verifyDisabled :style="verifyDisabled?'background:#f2f2f2':''" >
+         <input type="password" placeholder="请输入密码" v-show=" ['psdLogin','register'].includes(type)" v-model="form.password">
+         <input type="password" placeholder="再次确认密码" v-show="type == 'register'" v-model="form.rePassword">
+         <input type="text" placeholder="请输入邮箱验证码" v-show=" ['emailLogin','register'].includes(type)" :disabled = verifyDisabled :style="verifyDisabled?'background:#f2f2f2':''" v-model="form.verfiy">
        </div>
-        <button class="submit">{{type == 'changeRegister'?'注册':'登录'}}</button>
+        <button class="submit" @click="confirmSubmit()" >{{type == 'register'?'注册':'登录'}}</button>
      <div style="display: flex; justify-content: space-between;">
-        <p class="signup-link" v-show="type!=='changeRegister'">
-          没有账号?<a  style="cursor: pointer;" @click="changeRegister">去注册</a>
+        <p class="signup-link" v-show="type!=='register'">
+          没有账号?<a  style="cursor: pointer;color: #8ec5fc;" @click="changeRegister">去注册</a>
         </p>
-        <p v-show="type=='changeRegister'"></p>
-        <p class="signup-link"><a style="cursor: pointer;" @click="changeOtherLogin">{{type=='psdLogin'? '邮箱验证登录':'账号密码登录'}}</a></p>
+        <p v-show="type=='register'"></p>
+        <p class="signup-link"><a style="cursor: pointer;color: #e0c3fc;" @click="changeOtherLogin">{{type=='psdLogin'? '邮箱验证登录':'账号密码登录'}}</a></p>
      </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref ,watch} from 'vue'
-import { LoginType } from './interface'
+import { reactive, ref ,watch} from 'vue'
+import { LoginType,LoginForm } from './interface'
 import patternUnit from '@/utils/pattern'
 
-const type = ref<LoginType>("psdLogin") // emailLogin psdLogin changeRegister
-
-const verifyDisabled = ref<boolean>(true)
+const type = ref<LoginType>("psdLogin") // 类型： 账号密码登录 | 邮箱验证登录 | 注册
+const verifyDisabled = ref<boolean>(true) 
+const form = ref<LoginForm>(new LoginForm())
 
 // 切换登录
 const changeOtherLogin = () => {
-    type.value = type.value != "psdLogin" ? "psdLogin" :"emailLogin"
+    type.value == "register" && (form.value = new LoginForm())
+    if(type.value != "psdLogin"){
+      type.value = "psdLogin"
+      initCountdown()
+    }else{
+      type.value = "emailLogin"
+    }
 }
 // 切换注册
-const changeRegister = () =>{
-  type.value = "changeRegister"
+const changeRegister = () =>{ 
+  initCountdown()
+  type.value = "register"
+  form.value = new LoginForm()
 }
 // 验证邮箱
 const verify = () =>{
@@ -60,12 +68,20 @@ const countdown = ()=>{
     },1000)
 }
 
+// 初始化倒计时
+const initCountdown = () =>{
+  clearInterval(timer)
+  verifyDisabled.value = true
+  time.value = 60
+}
+
+// 提交数据
+const confirmSubmit = () => {
+  
+}
+
 watch(time,(newVal:number,oldVal:number)=>{
-  if(newVal <= 0){
-    clearInterval(timer)
-    verifyDisabled.value = true
-    time.value = 60
-  }
+  newVal <= 0 && initCountdown()
 })
 
 </script>
