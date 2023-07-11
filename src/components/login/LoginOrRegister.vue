@@ -1,0 +1,160 @@
+<template>
+  <div class="form">
+      <p class="form-title">{{ type=='changeRegister'?'注册':'请登录'}}</p>
+       <div class="input-container email" >
+            <input type="email" placeholder="请输入邮箱" >
+            <span>
+            </span>
+            <div v-show=" ['emailLogin','changeRegister'].includes(type)" class="arrow-btn" @click="verify">{{!verifyDisabled ? `重新发送(${time}s)` :'验证'}}</div>
+        </div>
+        <div class="input-container">
+         <input type="password" placeholder="请输入密码" v-show=" ['psdLogin','changeRegister'].includes(type)  ">
+         <input type="password" placeholder="再次确认密码" v-show="type == 'changeRegister'">
+         <input type="text" placeholder="请输入邮箱验证码" v-show=" ['emailLogin','changeRegister'].includes(type)" :disabled = verifyDisabled :style="verifyDisabled?'background:#f2f2f2':''" >
+       </div>
+        <button class="submit">{{type == 'changeRegister'?'注册':'登录'}}</button>
+     <div style="display: flex; justify-content: space-between;">
+        <p class="signup-link" v-show="type!=='changeRegister'">
+          没有账号?<a  style="cursor: pointer;" @click="changeRegister">去注册</a>
+        </p>
+        <p v-show="type=='changeRegister'"></p>
+        <p class="signup-link"><a style="cursor: pointer;" @click="changeOtherLogin">{{type=='psdLogin'? '邮箱验证登录':'账号密码登录'}}</a></p>
+     </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { ref ,watch} from 'vue'
+import { LoginType } from './interface'
+import patternUnit from '@/utils/pattern'
+
+const type = ref<LoginType>("psdLogin") // emailLogin psdLogin changeRegister
+
+const verifyDisabled = ref<boolean>(true)
+
+// 切换登录
+const changeOtherLogin = () => {
+    type.value = type.value != "psdLogin" ? "psdLogin" :"emailLogin"
+}
+// 切换注册
+const changeRegister = () =>{
+  type.value = "changeRegister"
+}
+// 验证邮箱
+const verify = () =>{
+  verifyDisabled.value = false
+  countdown()
+}
+// 规则
+const rules = {
+  email:[{require:true,message:'请输入邮箱'},{pattern:patternUnit.emailReg,message:'请输入正确的邮箱'}],
+  psd:[{require:true,message:'请输入密码'},{pattern:patternUnit.psdReg,message:'必须要数字+英文 6-12位'}],
+}
+
+const time = ref<number>(60)
+let timer:any= null
+// 倒计时60s
+const countdown = ()=>{
+    timer = setInterval(()=>{
+      time.value--
+    },1000)
+}
+
+watch(time,(newVal:number,oldVal:number)=>{
+  if(newVal <= 0){
+    clearInterval(timer)
+    verifyDisabled.value = true
+    time.value = 60
+  }
+})
+
+</script>
+
+<style lang="scss" scoped>
+.form {
+  background-color: #fff;
+  display: block;
+  padding: 1rem;
+  max-width: 350px;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.form-title {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  text-align: center;
+  color: #000;
+}
+
+.input-container {
+  position: relative;
+}
+
+.input-container input, .form button {
+  outline: none;
+  border: 1px solid #e5e7eb;
+  margin: 8px 0;
+}
+
+.input-container input {
+  background-color: #fff;
+  padding: 1rem;
+  padding-right: 3rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  width: 280px;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.submit {
+  cursor: pointer;
+  display: block;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+  color: #ffffff;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  width: 100%;
+  border-radius: 0.5rem;
+  text-transform: uppercase;
+}
+
+.signup-link {
+  color: #6B7280;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  text-align: center;
+}
+
+.signup-link a {
+  text-decoration: underline;
+}
+
+.email {
+    position: relative;
+    .arrow-btn{
+      position: absolute;
+      padding: 0 10px;
+      height: 30px;
+      line-height: 30px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      user-select: none;
+      border-radius: 8px;
+      background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+      top: 20px;
+      right: 10px;
+    }
+}
+
+</style>
