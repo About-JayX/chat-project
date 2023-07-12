@@ -27,7 +27,11 @@
 import { reactive, ref ,watch} from 'vue'
 import { LoginType,LoginForm } from './interface'
 import patternUnit from '@/utils/pattern'
+import {useUserStore} from '@/store/modules/user'
+import { login } from '@/request/modules/user'
+import {ResLogin} from './interface'
 
+const userStore = useUserStore()
 const type = ref<LoginType>("psdLogin") // 类型： 账号密码登录 | 邮箱验证登录 | 注册
 const verifyDisabled = ref<boolean>(true) 
 const form = ref<LoginForm>(new LoginForm())
@@ -50,8 +54,8 @@ const changeRegister = () =>{
 }
 // 验证邮箱
 const verify = () =>{
+  verifyDisabled.value == true && countdown()
   verifyDisabled.value = false
-  countdown()
 }
 // 规则
 const rules = {
@@ -77,7 +81,35 @@ const initCountdown = () =>{
 
 // 提交数据
 const confirmSubmit = () => {
-  
+  switch(type.value){
+    case "emailLogin":confirmEmilLogin()
+      break;
+    case "psdLogin":confirmPsdLogin()
+      break;
+    case "register":confirmRegister()
+      break;
+  }
+}
+// 注册
+const confirmRegister = () =>{
+
+}
+
+// 账号密码登录
+const confirmPsdLogin = () =>{
+  const postData = {}
+  login<ResLogin>(postData).then((res)=>{
+    if(res.code === 200){
+      userStore.setToken(res.data.token)
+    }
+  }).catch(e=>{
+    console.log(e);
+  })
+}
+
+// 邮箱验证登录
+const confirmEmilLogin = () =>{
+
 }
 
 watch(time,(newVal:number,oldVal:number)=>{

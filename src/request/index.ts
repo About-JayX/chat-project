@@ -1,5 +1,7 @@
 import axios, { AxiosInstance,AxiosError,AxiosRequestConfig, InternalAxiosRequestConfig,AxiosResponse } from 'axios'
 import { ResWholeData } from './interface';
+import { useUserStore } from '@/store/modules/user';
+import { refreshToken } from './modules/user';
 
 // axios配置
 const config = {
@@ -9,7 +11,6 @@ const config = {
 }
 const requestQueue:any[] = []; // 请求队列
 let isRefreshing = false; //判断刷新令牌是否进行的标识，当触发无感刷新时，将其设为true
-let token  = '12sdasdasf4as5as' //假token
 
 class HttpRequest{
     service:AxiosInstance;
@@ -19,9 +20,10 @@ class HttpRequest{
         // 请求拦截器
         this.service.interceptors.request.use(
             (config:InternalAxiosRequestConfig) =>{
+                const userStore = useUserStore()
                 // 1.请求头添加token
-                if(token){
-                    this.service.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                if(userStore.token){
+                    this.service.defaults.headers.common['Authorization'] = `Bearer ${userStore.token}`;
                 }
                 // 2.在请求发送前检查刷新令牌是否正在进行, 如果是，则将请求放入队列中，等待刷新完成后重新发送
                 if (isRefreshing) {
@@ -40,13 +42,16 @@ class HttpRequest{
         // 响应拦截器
         this.service.interceptors.response.use(
             (response:AxiosResponse):any =>{
+              console.log(response);
+              
                 const {status} = response
                 // 如果token令牌过期
                 if(status === 401){
                     if (!isRefreshing) {
                         isRefreshing = true;
                         // 刷新令牌
-                        return refreshAccessToken()
+                        const postData = {}
+                        return refreshToken(postData)
                         .then((newToken:any)=>{
                             // 更新请求的授权头部信息为新的令牌
                             this.service.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
@@ -95,18 +100,6 @@ class HttpRequest{
     }
 }
 
-// 执行刷新令牌的操作，获取新的令牌
-function refreshAccessToken() {
-    // 发起刷新令牌的请求
-    // ...
-  
-    // 返回一个 Promise，用于处理刷新令牌的结果
-    // 如果刷新成功，返回新的令牌
-    // 如果刷新失败，可以抛出一个错误，供上层处理
-    // ...
-    return new Promise(()=>{})
-  }
-  
   // 处理请求队列中的请求，并将队列清空
   function processRequestQueue() {
     while (requestQueue.length) {

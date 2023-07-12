@@ -1,6 +1,23 @@
-import {addUserApi} from '../api'
+import {addUserApi,registerApi,loginApi,verfiyApi,refreshTokenApi} from '../api'
 import request from '../index'
 
 export function addUser<T>(params:Object){
-    return request.get<T>(addUserApi,params)
+    return request.post<T>(addUserApi,params)
+}
+
+// 注册
+export function register<T>(params:Object){
+    return request.post<T>(registerApi,params)
+}
+// 登录
+export function login<T>(params:Object){
+    return request.post<T>(loginApi,params)
+}
+// 邮箱验证
+export function verfiy<T>(params:Object){
+    return request.post<T>(verfiyApi,params)
+}
+// 刷新token
+export function refreshToken<T>(params:Object){
+    return request.post<T>(refreshTokenApi,params)
 }

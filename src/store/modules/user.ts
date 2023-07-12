@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import  piniaPersistConfig  from "../piniaPersist";
 export const useUserStore = defineStore({
     id:"user",
     state:()=>({
@@ -14,4 +15,5 @@ export const useUserStore = defineStore({
             this.userInfo = userInfo
         }
     },
+    persist:piniaPersistConfig("myToken",["token"]) //设置本地存储
 })

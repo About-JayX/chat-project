@@ -12,13 +12,16 @@
     "ant-design-vue": "^3.2.20",
     "axios": "^1.4.0",
     "node-sass": "^9.0.0",
+    "nprogress": "^0.2.0",
     "pinia": "^2.1.4",
+    "pinia-plugin-persistedstate": "^3.1.0",
     "sass": "^1.63.6",
     "vue": "^3.3.4",
     "vue-router": "^4.2.4"
   },
   "devDependencies": {
     "@types/node": "^20.4.1",
+    "@types/nprogress": "^0.2.0",
     "@vitejs/plugin-vue": "^4.2.3",
     "typescript": "^5.0.2",
     "vite": "^4.4.0",

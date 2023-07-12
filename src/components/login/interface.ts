@@ -6,3 +6,12 @@ export class LoginForm {
     rePassword:string = ''
     verify:string = ''
 }
+
+
+export interface ReqLogin {
+    
+}
+
+export interface ResLogin {
+    token:''
+}
