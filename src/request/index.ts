@@ -50,7 +50,6 @@ class HttpRequest {
     // 响应拦截器
     this.service.interceptors.response.use(
       (response: AxiosResponse): any => {
-        console.log(response)
 
         const { status } = response
         // 如果token令牌过期
@@ -87,7 +86,8 @@ class HttpRequest {
           }
         }
         // 对于其他响应，直接返回
-        return response
+        
+        return response.data
       },
       (error: AxiosError) => {
         /** 相关操作 */

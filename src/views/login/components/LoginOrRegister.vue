@@ -31,8 +31,9 @@ import { reactive, ref, watch } from 'vue'
 import { LoginType, LoginForm } from './interface'
 import patternUnit from '@/utils/pattern'
 import { useUserStore } from '@/store/modules/user'
-import { login, verfiy, register } from '@/request/modules/user'
+import { login, verfiy, register, getToken } from '@/request/modules/user'
 import { ResLogin } from './interface'
+import { ResWholeData } from '@/request/interface'
 
 const userStore = useUserStore()
 const type = ref<LoginType>("psdLogin") // 类型： 账号密码登录 | 邮箱验证登录 | 注册
@@ -123,11 +124,19 @@ const confirmRegister = () => {
 
 // 账号密码登录
 const confirmPsdLogin = () => {
-  const postData = {}
+  const postData = {
+    userName: form.value.email,
+    passWord: form.value.password
+  }
   login<ResLogin>(postData).then((res) => {
-    if (res.code === 200) {
-      userStore.setToken(res.data.token)
-    }
+
+    
+console.log(res.data._id,"res.data._id");
+
+
+    // if (res.code === 200) {
+    //   userStore.setToken(res.data.token)
+    // }
   }).catch(e => {
     console.log(e);
   })

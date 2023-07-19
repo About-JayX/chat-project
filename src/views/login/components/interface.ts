@@ -10,5 +10,15 @@ export class LoginForm {
 export interface ReqLogin {}
 
 export interface ResLogin {
-  token: ''
+  _id: string
+  userName: String
+  userInfo: {
+    nickName?: String
+    sex?: Number
+    email?: String
+    phone?: String
+    avatar?: String
+    //  -1 未填写用户信息 0 禁用 1 正常
+    status: Number
+  }
 }
