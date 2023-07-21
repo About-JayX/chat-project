@@ -24,6 +24,7 @@
   "devDependencies": {
     "@types/node": "^20.4.1",
     "@types/nprogress": "^0.2.0",
+    "@types/webpack-env": "^1.18.1",
     "@vitejs/plugin-vue": "^4.2.3",
     "typescript": "^5.0.2",
     "vite": "^4.4.0",
