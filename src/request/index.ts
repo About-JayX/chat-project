@@ -7,8 +7,10 @@ import axios, {
 } from 'axios'
 import { ResWholeData } from './interface'
 import { useUserStore } from '@/store/modules/user'
+
 import { refreshToken } from './modules/user'
 
+import { message } from 'ant-design-vue'
 // axios配置
 const config = {
   baseURL: '/api',
@@ -27,12 +29,10 @@ class HttpRequest {
     this.service.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         const userStore = useUserStore()
+
         // 1.请求头添加token
-        if (userStore.token) {
-          this.service.defaults.headers.common[
-            'Authorization'
-          ] = `Bearer ${userStore.token}`
-        }
+        userStore.token &&
+          (config.headers.Authorization = `Bearer ${userStore.token}`)
         // 2.在请求发送前检查刷新令牌是否正在进行, 如果是，则将请求放入队列中，等待刷新完成后重新发送
         if (isRefreshing) {
           return new Promise(resolve => {
@@ -50,7 +50,6 @@ class HttpRequest {
     // 响应拦截器
     this.service.interceptors.response.use(
       (response: AxiosResponse): any => {
-
         const { status } = response
         // 如果token令牌过期
         if (status === 401) {
@@ -85,8 +84,15 @@ class HttpRequest {
             })
           }
         }
+
+        const data: ResWholeData<any> = response.data
+
+        if (!(data.code === 200)) {
+          message.error(data.msg)
+          throw new Error(data.msg)
+        }
         // 对于其他响应，直接返回
-        
+
         return response.data
       },
       (error: AxiosError) => {

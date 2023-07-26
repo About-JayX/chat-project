@@ -6,7 +6,6 @@ interface moudleType {
   [key: string]: any
 }
 
-console.log(Object.values(routeFiles), 'routeFiles')
 Object.entries(routeFiles).map(([file, moudle]) => {
   const route = getRouteMoudle(file, moudle as moudleType)
   if (route) {

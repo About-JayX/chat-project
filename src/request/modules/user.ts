@@ -5,6 +5,7 @@ import {
   verfiyApi,
   getTokenApi,
   refreshTokenApi,
+  testTokenApi,
 } from '../api'
 import request from '../index'
 
@@ -27,6 +28,9 @@ export function verfiy<T>(params: Object) {
 
 export function getToken<T>(params: Object) {
   return request.post<T>(getTokenApi, params)
+}
+export function testToken<T>(params?: Object) {
+  return request.post<T>(testTokenApi, params)
 }
 
 // 刷新token

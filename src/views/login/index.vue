@@ -6,6 +6,7 @@
 
 <script setup lang="ts">
 import Register from './components/LoginOrRegister.vue'
+
 </script>
 
 <style lang="scss">

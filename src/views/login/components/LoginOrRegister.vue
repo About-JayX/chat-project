@@ -1,29 +1,33 @@
 <template>
-  <div class="form">
-    <p class="form-title">{{ type == 'register' ? '注册' : '请登录' }}</p>
-    <div class="input-container email">
-      <input type="email" placeholder="请输入邮箱" v-model="form.email">
-      <span>
-      </span>
-      <div v-show="['emailLogin', 'register'].includes(type)" class="arrow-btn" @click="verify">{{ !verifyDisabled ?
-        `重新发送(${time}s)` : '验证' }}</div>
+  <transition name="fade">
+    <div class="form">
+      <p class="form-title">{{ type == 'register' ? '注册' : '请登录' }}</p>
+      <div class="input-container email">
+        <input type="email" placeholder="请输入邮箱" v-model="form.email">
+        <span>
+        </span>
+        <div v-show="['emailLogin', 'register'].includes(type)" class="arrow-btn" @click="verify">{{ !verifyDisabled ?
+          `重新发送(${time}s)` : '验证' }}</div>
+      </div>
+      <div class="input-container">
+        <input type="password" placeholder="请输入密码" v-show="['psdLogin', 'register'].includes(type)"
+          v-model="form.password">
+        <input type="password" placeholder="再次确认密码" v-show="type == 'register'" v-model="form.rePassword">
+        <input type="text" placeholder="请输入邮箱验证码" v-show="['emailLogin', 'register'].includes(type)"
+          :style="verifyDisabled ? 'background:#f2f2f2' : ''" v-model="form.verify">
+      </div>
+      <button class="submit" @click="confirmSubmit()">{{ type == 'register' ? '注册' : '登录' }}</button>
+      <div style="display: flex; justify-content: space-between;">
+        <p class="signup-link" v-show="type !== 'register'">
+          没有账号?<a style="cursor: pointer;color: #8ec5fc;" @click="changeRegister">去注册</a>
+        </p>
+        <p v-show="type == 'register'"></p>
+        <p class="signup-link"><a style="cursor: pointer;color: #e0c3fc;" @click="changeOtherLogin">{{ type == 'psdLogin'
+          ?
+          '邮箱验证登录' : '账号密码登录' }}</a></p>
+      </div>
     </div>
-    <div class="input-container">
-      <input type="password" placeholder="请输入密码" v-show="['psdLogin', 'register'].includes(type)" v-model="form.password">
-      <input type="password" placeholder="再次确认密码" v-show="type == 'register'" v-model="form.rePassword">
-      <input type="text" placeholder="请输入邮箱验证码" v-show="['emailLogin', 'register'].includes(type)"
-        :style="verifyDisabled ? 'background:#f2f2f2' : ''" v-model="form.verify">
-    </div>
-    <button class="submit" @click="confirmSubmit()">{{ type == 'register' ? '注册' : '登录' }}</button>
-    <div style="display: flex; justify-content: space-between;">
-      <p class="signup-link" v-show="type !== 'register'">
-        没有账号?<a style="cursor: pointer;color: #8ec5fc;" @click="changeRegister">去注册</a>
-      </p>
-      <p v-show="type == 'register'"></p>
-      <p class="signup-link"><a style="cursor: pointer;color: #e0c3fc;" @click="changeOtherLogin">{{ type == 'psdLogin' ?
-        '邮箱验证登录' : '账号密码登录' }}</a></p>
-    </div>
-  </div>
+  </Transition>
 </template>
 
 <script lang="ts" setup>
@@ -31,9 +35,8 @@ import { reactive, ref, watch } from 'vue'
 import { LoginType, LoginForm } from './interface'
 import patternUnit from '@/utils/pattern'
 import { useUserStore } from '@/store/modules/user'
-import { login, verfiy, register, getToken } from '@/request/modules/user'
-import { ResLogin } from './interface'
-import { ResWholeData } from '@/request/interface'
+import { login, verfiy, register, getToken, testToken } from '@/request/modules/user'
+import { ResLogin, ResToken } from './interface'
 
 const userStore = useUserStore()
 const type = ref<LoginType>("psdLogin") // 类型： 账号密码登录 | 邮箱验证登录 | 注册
@@ -122,32 +125,32 @@ const confirmRegister = () => {
   })
 }
 
-// 账号密码登录
 const confirmPsdLogin = () => {
   const postData = {
     userName: form.value.email,
     passWord: form.value.password
   }
-  login<ResLogin>(postData).then((res) => {
-
-    
-console.log(res.data._id,"res.data._id");
-
-
-    // if (res.code === 200) {
-    //   userStore.setToken(res.data.token)
-    // }
+  login<ResLogin>(postData).then(async (res) => {
+    if (res.code === 200) {
+      await userStore.setUserInfo(res.data)
+      const tokenRes = await getToken<ResToken>({ _id: res.data._id })
+      if (tokenRes.code === 200) {
+        let { token } = tokenRes.data
+        token = token.toLocaleLowerCase()
+        userStore.setToken(token)
+      }
+      await testToken()
+    }
   }).catch(e => {
-    console.log(e);
+    console.log(e, "catch__");
   })
 }
-
 // 邮箱验证登录
 const confirmEmilLogin = () => {
 
 }
 
-watch(time, (newVal: number, oldVal: number) => {
+watch(time, (newVal: number) => {
   newVal <= 0 && initCountdown()
 })
 
@@ -240,5 +243,15 @@ watch(time, (newVal: number, oldVal: number) => {
     top: 20px;
     right: 10px;
   }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
